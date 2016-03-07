@@ -20,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
 
     private InterstitialAd mInterstitialAd;
     private Button mJokeButton;
+    private boolean adLoaded=false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,21 +37,27 @@ public class MainActivity extends AppCompatActivity {
         interstitialAd.setAdListener(new AdListener() {
             @Override
             public void onAdLoaded() {
+                adLoaded=true;
                 mJokeButton.setEnabled(true);
             }
 
             @Override
             public void onAdFailedToLoad(int errorCode) {
+                mJokeButton.setEnabled(true);
             }
 
             @Override
             public void onAdClosed() {
-                Intent intent = new Intent(MainActivity.this, JokeDisplay.class);
-                intent.putExtra("joke", new JokeFinder().getJoke());
-                startActivity(intent);
+                MakeJoke();
             }
         });
         return interstitialAd;
+    }
+
+    private void MakeJoke() {
+        Intent intent = new Intent(MainActivity.this, JokeDisplay.class);
+        intent.putExtra("joke", new JokeFinder().getJoke());
+        startActivity(intent);
     }
 
     private void showInterstitial() {
@@ -65,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
     private void loadInterstitial() {
 
         AdRequest adRequest = new AdRequest.Builder()
-                .setRequestAgent("android_studio:ad_template").addTestDevice("610F604FBFE80254801BB4F20CCFCA18").build();
+                .setRequestAgent("android_studio:ad_template").addTestDevice(getString(R.string.AdMobDeviceID)).build();
         mInterstitialAd.loadAd(adRequest);
     }
 
@@ -92,8 +99,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void tellJoke(View view){
-
-        showInterstitial();
+        if(adLoaded)
+            showInterstitial();
+        else
+            MakeJoke();
     }
 
 
