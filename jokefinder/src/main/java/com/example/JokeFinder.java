@@ -12,7 +12,7 @@ public class JokeFinder {
             case 0:
                 return "Darren Walsh: I just deleted all the German names off my phone. It's Hans free.";
             case 1:
-                return "Stewart Francis: Kim Kardashian is saddled with a huge arse … but enough about Kanye West.";
+                return "Stewart Francis: Kim Kardashian is saddled with a huge arse ... but enough about Kanye West.";
             case 2:
                 return "Adam Hess: Surely every car is a people carrier?";
             case 3:
