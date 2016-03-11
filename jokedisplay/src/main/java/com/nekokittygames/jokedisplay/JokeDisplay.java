@@ -13,7 +13,7 @@ public class JokeDisplay extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_joke_display);
-
+        AdDisplay.DisplayAd(this,findViewById(R.id.JokeDisplay));
         // Create the next level button, which tries to show an interstitial when clicked.
         TextView jokeView = (TextView) findViewById(R.id.JokeText);
         jokeView.setText(getIntent().getStringExtra("joke"));

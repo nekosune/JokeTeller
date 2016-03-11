@@ -1,5 +1,7 @@
 package com.udacity.gradle.builditbigger;
 
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -7,74 +9,46 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
-
-import com.example.JokeFinder;
-import com.google.android.gms.ads.AdListener;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.InterstitialAd;
 import com.nekokittygames.jokedisplay.JokeDisplay;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity  implements IResultHandler{
 
-    private InterstitialAd mInterstitialAd;
     private Button mJokeButton;
-    private boolean adLoaded=false;
+    private ProgressDialog progress;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mJokeButton = (Button) findViewById(R.id.jokeButton);
 
-        mInterstitialAd = newInterstitialAd();
-        loadInterstitial();
+
+        AdManager.InitInterstatialAd(this, mJokeButton);
+        AdManager.loadInterstitial(this);
     }
 
-    private InterstitialAd newInterstitialAd() {
-        InterstitialAd interstitialAd = new InterstitialAd(this);
-        interstitialAd.setAdUnitId(getString(R.string.interstatial_ad_unit_id));
-        interstitialAd.setAdListener(new AdListener() {
-            @Override
-            public void onAdLoaded() {
-                adLoaded=true;
-                mJokeButton.setEnabled(true);
-            }
 
-            @Override
-            public void onAdFailedToLoad(int errorCode) {
-                mJokeButton.setEnabled(true);
-            }
 
-            @Override
-            public void onAdClosed() {
-                MakeJoke();
-            }
-        });
-        return interstitialAd;
+    public static void MakeJoke(MainActivity context) {
+        context.progress=new ProgressDialog(context);
+        context.progress.setTitle("Loading");
+        context.progress.setMessage("Wait while loading...");
+        context.progress.show();
+        new JokeTask(context).execute(context);
     }
 
-    private void MakeJoke() {
-        Intent intent = new Intent(MainActivity.this, JokeDisplay.class);
-        intent.putExtra("joke", new JokeFinder().getJoke());
-        startActivity(intent);
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(!AdManager.isPaid())
+            mJokeButton.setEnabled(false);
+        AdManager.InitInterstatialAd(this,mJokeButton);
+        AdManager.loadInterstitial(this);
     }
 
-    private void showInterstitial() {
-        // Show the ad if it's ready. Otherwise toast and reload the ad.
-        if (mInterstitialAd != null && mInterstitialAd.isLoaded()) {
-            mInterstitialAd.show();
-        } else {
-            Toast.makeText(this, "Ad did not load", Toast.LENGTH_SHORT).show();
-        }
-    }
 
-    private void loadInterstitial() {
-
-        AdRequest adRequest = new AdRequest.Builder()
-                .setRequestAgent("android_studio:ad_template").addTestDevice(getString(R.string.AdMobDeviceID)).build();
-        mInterstitialAd.loadAd(adRequest);
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -99,11 +73,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void tellJoke(View view){
-        if(adLoaded)
-            showInterstitial();
-        else
-            MakeJoke();
+
+            AdManager.showInterstitial(this);
     }
 
 
+    @Override
+    public void gotJoke(String joke) {
+        progress.dismiss();
+        Intent intent = new Intent(this, JokeDisplay.class);
+        intent.putExtra("joke", joke);
+        this.startActivity(intent);
+    }
 }
